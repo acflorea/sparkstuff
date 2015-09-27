@@ -1,6 +1,7 @@
 package controllers
 
-import model.MatchData
+import model.{NAStatCounter, MatchData}
+import org.apache.spark.rdd.RDD
 import org.apache.spark.storage.StorageLevel
 import org.apache.spark.util.StatCounter
 import play.api.Play
@@ -129,6 +130,39 @@ object DataMungingController extends Controller {
         } else {
           Future.successful(BadRequest("Wrong index"))
         }
+    }
+  }
+
+  /**
+   * Statistics on steroids per score element
+   */
+  def fullStats() = {
+    Action.async {
+      implicit request =>
+        val scoresWitNaNs = dataBlocks.map(md => md.scores.map(d => d.getOrElse(Double.NaN)))
+
+        val nastats = scoresWitNaNs.mapPartitions(
+          (iter: Iterator[Array[Double]]) => {
+            val nas: Array[NAStatCounter] = iter.next().map(d =>
+              NAStatCounter(d))
+            iter.foreach(arr => {
+              nas.zip(arr).foreach { case (n, d) => n.merge(d) }
+            })
+            Iterator(nas)
+          })
+
+        val globals = nastats.reduce((n1, n2) => {
+          n1.zip(n2).map { case (a, b) => a.merge(b) }
+        })
+
+        // dumb test block - verify that for all the score components
+        // number of existing values plus number of missing values
+        // matches the number of samples
+        val testTotals = globals.map(s => s.stats.count + s.missing)
+        val total = dataBlocks.count()
+        assert(testTotals.forall(t => t == total))
+
+        Future.successful(Ok(Json.toJson(globals)))
     }
   }
 

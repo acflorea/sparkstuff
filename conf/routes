@@ -18,3 +18,4 @@ GET        /data/sample                 controllers.DataMungingController.sample
 GET        /raw/take/:howMany           controllers.DataMungingController.take(raw:Boolean = true, howMany:Int)
 GET        /data/take/:howMany          controllers.DataMungingController.take(raw:Boolean = false, howMany:Int)
 GET        /data/stats/:position        controllers.DataMungingController.stats(position:Int)
+GET        /data/full-stats             controllers.DataMungingController.fullStats()
