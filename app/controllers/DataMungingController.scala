@@ -2,6 +2,7 @@ package controllers
 
 import model.MatchData
 import org.apache.spark.storage.StorageLevel
+import org.apache.spark.util.StatCounter
 import play.api.Play
 import play.api.mvc.{Action, Controller}
 import dr.acf.services.spark.SparkService._
@@ -107,6 +108,27 @@ object DataMungingController extends Controller {
         collect()
       // ***
       Future.successful(Ok(Json.toJson(samples)))
+    }
+  }
+
+  /**
+   * Statistics per score element
+   * @param position - score index
+   *                 must be between 0 and 9 to match a valid position
+   */
+  def stats(position: Int) = {
+    Action.async {
+      implicit request =>
+        if (position > 0 && position < 9) {
+          import java.lang.Double.isNaN
+          val stats = dataBlocks.
+            map(md => md.scores(position).getOrElse(Double.NaN)).
+            filter(!isNaN(_)).
+            stats()
+          Future.successful(Ok(Json.toJson(stats.toString())))
+        } else {
+          Future.successful(BadRequest("Wrong index"))
+        }
     }
   }
 
