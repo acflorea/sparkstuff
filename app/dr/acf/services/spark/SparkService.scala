@@ -24,14 +24,18 @@ object SparkService extends AbstractService {
     val sparkConf = new BaseConfiguration().subset("spark")
 
     // merge defaults with loaded configs
-    Play.configuration.getConfig("spark").map {
-      _.entrySet map { tuple =>
+    Play.configuration.getConfig("spark").foreach {
+      _.entrySet foreach { tuple =>
         sparkConf.setProperty(tuple._1, tuple._2.unwrapped())
       }
     }
 
+    // configs
+    val master = sparkConf.getString("master.URL", "local")
+    val appName = sparkConf.getString("appName", "SparkStuff")
+
     // Spark configuration
-    val config: SparkConf = new SparkConf().setMaster("local").setAppName("SparkPlay")
+    val config: SparkConf = new SparkConf().setMaster(master).setAppName(appName)
     // Initialize Spark context
     _sc = new SparkContext(config)
   }
@@ -43,3 +47,4 @@ object SparkService extends AbstractService {
 
   override def doSetup(): Unit = {}
 }
+
