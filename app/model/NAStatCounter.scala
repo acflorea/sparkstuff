@@ -67,11 +67,16 @@ object NAStatCounter extends Serializable {
   import play.api.libs.functional.syntax._
 
   val NAStatCounterWrites: Writes[NAStatCounter] = (
-    (JsPath \ "stats").write[String] and
+    (JsPath \ "stats" \ "count").write[Long] and
+      (JsPath \ "stats" \ "mean").write[Double] and
+      (JsPath \ "stats" \ "sum").write[Double] and
       (JsPath \ "sumSquares").write[Double] and
+      (JsPath \ "stats" \ "max").write[Double] and
+      (JsPath \ "stats" \ "min").write[Double] and
       (JsPath \ "missing").write[Long]
     )(s =>
-    (s.stats.toString(), s.sumSquares, s.missing))
+    (s.stats.count, s.stats.mean, s.stats.sum, s.sumSquares,
+      s.stats.max, s.stats.min, s.missing))
 
   // TODO - ugly hack, try to find a better Reads implementation
   val NAStatCounterReads: Reads[NAStatCounter] = (
@@ -89,3 +94,4 @@ object NAStatCounter extends Serializable {
   def apply(values: Double*): NAStatCounter = new NAStatCounter(values)
 
 }
+
