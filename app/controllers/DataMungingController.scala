@@ -1,9 +1,6 @@
 package controllers
 
 import model.{NAStatCounter, MatchData}
-import org.apache.spark.rdd.RDD
-import org.apache.spark.storage.StorageLevel
-import org.apache.spark.util.StatCounter
 import play.api.Play
 import play.api.mvc.{Action, Controller}
 import dr.acf.services.spark.SparkService._

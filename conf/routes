@@ -3,19 +3,22 @@
 # ~~~~
 
 # Home page
-GET        /                            controllers.Application.index
+GET        /                              controllers.Application.index
 
 # Map static resources from the /public folder to the /assets URL path
-GET        /assets/*file                controllers.Assets.at(path="/public", file)
+GET        /assets/*file                  controllers.Assets.at(path="/public", file)
 
 # Ch2 - Data Analysis
-GET        /raw/first                   controllers.DataMungingController.first(raw:Boolean = true)
-GET        /data/first                  controllers.DataMungingController.first(raw:Boolean = false)
-GET        /raw/count                   controllers.DataMungingController.count(raw:Boolean = true)
-GET        /data/count                  controllers.DataMungingController.count(raw:Boolean = false)
-GET        /raw/sample                  controllers.DataMungingController.sample(raw:Boolean = true, withReplacement:Option[Boolean], fraction: Option[Double])
-GET        /data/sample                 controllers.DataMungingController.sample(raw:Boolean = false, withReplacement:Option[Boolean], fraction: Option[Double])
-GET        /raw/take/:howMany           controllers.DataMungingController.take(raw:Boolean = true, howMany:Int)
-GET        /data/take/:howMany          controllers.DataMungingController.take(raw:Boolean = false, howMany:Int)
-GET        /data/stats/:position        controllers.DataMungingController.stats(position:Int)
-GET        /data/full-stats             controllers.DataMungingController.fullStats()
+GET        /dc/raw/first                   controllers.DataMungingController.first(raw:Boolean = true)
+GET        /dc/data/first                  controllers.DataMungingController.first(raw:Boolean = false)
+GET        /dc/raw/count                   controllers.DataMungingController.count(raw:Boolean = true)
+GET        /dc/data/count                  controllers.DataMungingController.count(raw:Boolean = false)
+GET        /dc/raw/sample                  controllers.DataMungingController.sample(raw:Boolean = true, withReplacement:Option[Boolean], fraction: Option[Double])
+GET        /dc/data/sample                 controllers.DataMungingController.sample(raw:Boolean = false, withReplacement:Option[Boolean], fraction: Option[Double])
+GET        /dc/raw/take/:howMany           controllers.DataMungingController.take(raw:Boolean = true, howMany:Int)
+GET        /dc/data/take/:howMany          controllers.DataMungingController.take(raw:Boolean = false, howMany:Int)
+GET        /dc/data/stats/:position        controllers.DataMungingController.stats(position:Int)
+GET        /dc/data/full-stats             controllers.DataMungingController.fullStats()
+
+# Ch3 - Recommender Systems
+

@@ -85,7 +85,10 @@ object NAStatCounter extends Serializable {
       (JsPath \ "missing").read[Long]
     )((stats, sum, missing) => NAStatCounter(Double.NaN))
 
-  implicit val NAStatCounterJsonFormat = Format[NAStatCounter](NAStatCounterReads, NAStatCounterWrites)
+  implicit val NAStatCounterJsonFormat = Format[NAStatCounter](
+    NAStatCounterReads,
+    NAStatCounterWrites
+  )
 
   /** Build a StatCounter from a list of values. */
   def apply(values: TraversableOnce[Double]): NAStatCounter = new NAStatCounter(values)
