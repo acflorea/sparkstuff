@@ -1,15 +1,11 @@
 package controllers
 
 import dr.acf.services.spark.SparkService._
-import org.apache.hadoop.fs.Path
 import org.apache.spark.mllib.recommendation.Rating
-import play.api.Play
 import play.api.libs.json.Json
-import play.api.mvc.Action
-import play.api.mvc.Controller
+import play.api.mvc.{Action, Controller}
 
 import scala.concurrent.Future
-import play.api.Play.current
 
 /**
  * @see http://shop.oreilly.com/product/0636920035091.do - Chapter 3
@@ -18,10 +14,10 @@ import play.api.Play.current
  */
 object MusicRecommenderController extends Controller {
 
-  val rootFolder = s"/user/ds"
+  val rootFolder = "/user/ds"
 
   // Load data from HDFS - raw format
-  val rawUserArtistData = sc.textFile(fs.resolvePath(s"$rootFolder/user_artist_data.txt"), 10)
+  val rawUserArtistData = sc.textFile(fs.resolvePath(s"$rootFolder/user_artist_data.txt"))
   val rawArtistAlias = sc.textFile(fs.resolvePath(s"$rootFolder/artist_alias.txt"))
   val rawArtistData = sc.textFile(fs.resolvePath(s"$rootFolder/artist_data.txt"))
 

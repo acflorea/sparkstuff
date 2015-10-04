@@ -15,12 +15,8 @@ import scala.concurrent.Future
  */
 object DataMungingController extends Controller {
 
-  // configs
-  val hdfsHost = Play.configuration.getString("spark.hdfs.host").getOrElse("localhost")
-  val hdfsPort = Play.configuration.getInt("spark.hdfs.port").getOrElse(54310)
-
   // Load data from HDFS - raw format
-  lazy val rawBlocks = sc.textFile(s"hdfs://$hdfsHost:$hdfsPort/linkage")
+  lazy val rawBlocks = sc.textFile(fs.resolvePath("/linkage"))
 
   // Parsed data
   lazy val dataBlocks = rawBlocks.
