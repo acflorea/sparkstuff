@@ -1,9 +1,7 @@
-package model
+package model.datamunging
 
 import org.apache.spark.util.StatCounter
 import play.api.libs.json._
-
-import scala.collection.immutable.Stream.#::
 
 /**
  * Generic stats computation utility class

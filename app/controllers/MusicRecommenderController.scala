@@ -1,6 +1,7 @@
 package controllers
 
 import dr.acf.services.spark.SparkService. _
+import org.apache.spark.mllib.recommendation.Rating
 import play.api.Play
 import play.api.libs.json.Json
 import play.api.mvc.Action
@@ -20,12 +21,12 @@ object MusicRecommenderController extends Controller {
   val hdfsHost = Play.configuration.getString("spark.hdfs.host").getOrElse("localhost")
   val hdfsPort = Play.configuration.getInt("spark.hdfs.port").getOrElse(54310)
 
-  val rootFolder = "user/ds"
+  val rootFolder = s"$hdfsHost:$hdfsPort/user/ds"
 
   // Load data from HDFS - raw format
-  lazy val rawUserArtistData = sc.textFile(s"hdfs://$hdfsHost:$hdfsPort/$rootFolder/user_artist_data.txt")
-  lazy val rawArtistAlias = sc.textFile(s"hdfs://$hdfsHost:$hdfsPort/$rootFolder/artist_alias.txt")
-  lazy val rawArtistData = sc.textFile(s"hdfs://$hdfsHost:$hdfsPort/$rootFolder/artist_data.txt")
+  lazy val rawUserArtistData = sc.textFile(s"hdfs://$rootFolder/user_artist_data.txt")
+  lazy val rawArtistAlias = sc.textFile(s"hdfs://$rootFolder/artist_alias.txt")
+  lazy val rawArtistData = sc.textFile(s"hdfs://$rootFolder/artist_data.txt")
 
   /**
    * Artist data split and mapped to Option(id, name)
@@ -58,6 +59,18 @@ object MusicRecommenderController extends Controller {
       Some((tokens(0).toInt, tokens(1).toInt))
     }
   }.collectAsMap()
+
+  /**
+   * Training data
+   */
+  lazy val bArtistAlias = sc.broadcast(artistAlias)
+  lazy val trainData = rawUserArtistData.map { line =>
+    val Array(userID, artistID, count) = line.split(' ').map(_.toInt)
+    val finalArtistID =
+      bArtistAlias.value.getOrElse(artistID, artistID)
+    Rating(userID, finalArtistID, count)
+  }.cache()
+
 
   /**
    * Retrieves artist name by id

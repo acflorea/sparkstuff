@@ -1,4 +1,4 @@
-package model
+package model.datamunging
 
 import play.api.libs.json.Json
 

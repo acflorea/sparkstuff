@@ -1,6 +1,6 @@
 package controllers
 
-import model.{NAStatCounter, MatchData}
+import model.datamunging.{NAStatCounter, MatchData}
 import play.api.Play
 import play.api.mvc.{Action, Controller}
 import dr.acf.services.spark.SparkService._
