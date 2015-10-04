@@ -1,6 +1,7 @@
 package controllers
 
-import dr.acf.services.spark.SparkService. _
+import dr.acf.services.spark.SparkService._
+import org.apache.hadoop.fs.Path
 import org.apache.spark.mllib.recommendation.Rating
 import play.api.Play
 import play.api.libs.json.Json
@@ -17,16 +18,12 @@ import play.api.Play.current
  */
 object MusicRecommenderController extends Controller {
 
-  // configs
-  val hdfsHost = Play.configuration.getString("spark.hdfs.host").getOrElse("localhost")
-  val hdfsPort = Play.configuration.getInt("spark.hdfs.port").getOrElse(54310)
-
-  val rootFolder = s"$hdfsHost:$hdfsPort/user/ds"
+  val rootFolder = s"/user/ds"
 
   // Load data from HDFS - raw format
-  lazy val rawUserArtistData = sc.textFile(s"hdfs://$rootFolder/user_artist_data.txt")
-  lazy val rawArtistAlias = sc.textFile(s"hdfs://$rootFolder/artist_alias.txt")
-  lazy val rawArtistData = sc.textFile(s"hdfs://$rootFolder/artist_data.txt")
+  val rawUserArtistData = sc.textFile(fs.resolvePath(s"$rootFolder/user_artist_data.txt"), 10)
+  val rawArtistAlias = sc.textFile(fs.resolvePath(s"$rootFolder/artist_alias.txt"))
+  val rawArtistData = sc.textFile(fs.resolvePath(s"$rootFolder/artist_data.txt"))
 
   /**
    * Artist data split and mapped to Option(id, name)
@@ -61,16 +58,29 @@ object MusicRecommenderController extends Controller {
   }.collectAsMap()
 
   /**
-   * Training data
+   * Train data
+   * File consisting on all available instances of
+   * Rating(userID, finalArtistID, count)
    */
-  lazy val bArtistAlias = sc.broadcast(artistAlias)
-  lazy val trainData = rawUserArtistData.map { line =>
-    val Array(userID, artistID, count) = line.split(' ').map(_.toInt)
-    val finalArtistID =
-      bArtistAlias.value.getOrElse(artistID, artistID)
-    Rating(userID, finalArtistID, count)
-  }.cache()
-
+  lazy val trainData = {
+    val parsed_user_artist_data = s"$rootFolder/parsed_user_artist_data.txt"
+    if (!fs.exists(parsed_user_artist_data)) {
+      // compute and store parsed/formatted file
+      val bArtistAlias = sc.broadcast(artistAlias)
+      rawUserArtistData.map { line =>
+        // canonical artistID (use the Alias Map)
+        val Array(userID, artistID, count) = line.split(' ').map(_.toInt)
+        val finalArtistID =
+          bArtistAlias.value.getOrElse(artistID, artistID)
+        Rating(userID, finalArtistID, count)
+      }
+      rawUserArtistData.saveAsTextFile(
+        fs.resolvePath(rootFolder).concat("/parsed_user_artist_data.txt")
+      )
+    }
+    // return parsed and formatted file
+    sc.textFile(fs.resolvePath(parsed_user_artist_data))
+  }
 
   /**
    * Retrieves artist name by id
@@ -85,5 +95,21 @@ object MusicRecommenderController extends Controller {
       }
     )
   }
+
+  /**
+   * Obtain a data sample
+   * @return a fraction of data
+   */
+  def sample(
+              withReplacement: Option[Boolean],
+              count: Option[Int]) = Action.async { implicit request =>
+
+    implicit val ratingFormat = Json.format[Rating]
+    val samples = trainData.
+      takeSample(withReplacement.getOrElse(false), count.getOrElse(10))
+    // ***
+    Future.successful(Ok(Json.toJson(samples)))
+  }
+
 
 }

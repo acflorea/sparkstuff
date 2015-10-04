@@ -86,7 +86,7 @@ object DataMungingController extends Controller {
 
   /**
    * Obtain a data sample
-   * @return first data row
+   * @return a fraction of data
    */
   def sample(
               raw: Boolean,
