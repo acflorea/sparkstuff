@@ -1,11 +1,10 @@
 package controllers
 
-import model.datamunging.{NAStatCounter, MatchData}
-import play.api.Play
-import play.api.mvc.{Action, Controller}
 import dr.acf.services.spark.SparkService._
+import model.datamunging.{MatchData, NAStatCounter}
 import play.api.libs.json._
-import play.api.Play.current
+import play.api.mvc.{Action, Controller}
+
 import scala.concurrent.Future
 
 /**

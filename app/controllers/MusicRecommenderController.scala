@@ -1,7 +1,8 @@
 package controllers
 
 import dr.acf.services.spark.SparkService._
-import org.apache.spark.mllib.recommendation.Rating
+import org.apache.spark.mllib.recommendation.{ALS, Rating}
+import org.apache.spark.rdd.RDD
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
 
@@ -58,7 +59,7 @@ object MusicRecommenderController extends Controller {
    * File consisting on all available instances of
    * Rating(userID, finalArtistID, count)
    */
-  lazy val trainData = {
+  lazy val trainData: RDD[Rating] = {
     val parsed_user_artist_data = s"$rootFolder/parsed_user_artist_data.txt"
     if (!fs.exists(parsed_user_artist_data)) {
       // compute and store parsed/formatted file
@@ -75,7 +76,10 @@ object MusicRecommenderController extends Controller {
       )
     }
     // return parsed and formatted file
-    sc.textFile(fs.resolvePath(parsed_user_artist_data))
+    sc.textFile(fs.resolvePath(parsed_user_artist_data)) map { line =>
+      val Array(userID, artistID, count) = line.split(' ').map(_.toInt)
+      Rating(userID, artistID, count)
+    }
   }
 
   /**
@@ -107,5 +111,18 @@ object MusicRecommenderController extends Controller {
     Future.successful(Ok(Json.toJson(samples)))
   }
 
+
+  /**
+   * Build the model
+   * ALS => MatrixFactorizationModel
+   * @return
+   */
+  def train() = {
+    Action.async { implicit request2session =>
+      trainData.cache()
+      val model = ALS.trainImplicit(trainData, 10, 5, 0.01, 1.0)
+      Future.successful(Ok("Model trained"))
+    }
+  }
 
 }

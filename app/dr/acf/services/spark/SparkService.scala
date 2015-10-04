@@ -7,6 +7,7 @@ import org.apache.hadoop.fs.{Path, FileSystem}
 import org.apache.spark.{SparkConf, SparkContext}
 import play.api.Play
 import play.api.Play.current
+import scala.collection.JavaConversions._
 
 /**
  * Spark global settings
@@ -45,6 +46,11 @@ object SparkService extends AbstractService {
 
     // Spark configuration
     val config: SparkConf = new SparkConf().setMaster(master).setAppName(appName)
+
+    for (key <- sparkConf.getKeys.map(_.toString)) {
+      config.set(key, sparkConf.getProperty(key).toString)
+    }
+
     // Initialize Spark context
     _sc = new SparkContext(config)
 
