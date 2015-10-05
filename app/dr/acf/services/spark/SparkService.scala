@@ -42,24 +42,33 @@ object SparkService extends AbstractService {
 
     // Spark config properties
     val master = sparkConf.getString("master.URL", "local")
-    val appName = sparkConf.getString("appName", "SparkStuff")
+    val appName = sparkConf.getString("app.name", "SparkStuff")
 
     // Spark configuration
     val config: SparkConf = new SparkConf().setMaster(master).setAppName(appName)
 
     for (key <- sparkConf.getKeys.map(_.toString)) {
-      config.set(key, sparkConf.getProperty(key).toString)
+      config.set(s"spark.$key", sparkConf.getProperty(key).toString)
     }
 
     // Initialize Spark context
     _sc = new SparkContext(config)
 
-    // HDFS config properties
-    val hdfsHost = sparkConf.getString("hdfs.host", "locahost")
-    val hdfsPort = sparkConf.getInt("hdfs.port", 54310)
+    val dfsConf = new BaseConfiguration().subset("dfs")
+
+    // merge defaults with loaded configs
+    Play.configuration.getConfig("dfs").foreach {
+      _.entrySet foreach { tuple =>
+        dfsConf.setProperty(tuple._1, tuple._2.unwrapped())
+      }
+    }
+
+    // DFS config properties
+    val dfsHost = dfsConf.getString("host", "localhost")
+    val dfsPort = dfsConf.getInt("port", 54310)
 
     val conf = new Configuration()
-    conf.set("fs.default.name", s"hdfs://$hdfsHost:$hdfsPort")
+    conf.set("fs.default.name", s"hdfs://$dfsHost:$dfsPort")
     _fs = FileSystem.get(conf)
 
   }
