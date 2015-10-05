@@ -115,12 +115,19 @@ object MusicRecommenderController extends Controller {
   /**
    * Build the model
    * ALS => MatrixFactorizationModel
-   * @return
+   * @param rank       number of features to use
+   * @param iterations number of iterations of ALS (recommended: 10-20)
+   * @param lambda     regularization factor (recommended: 0.01)
+   * @param alpha      confidence parameter
    */
-  def train() = {
+  def train(
+             rank: Option[Int] = Some(10),
+             iterations: Option[Int] = Some(5),
+             lambda: Option[Double] = Some(0.01),
+             alpha: Option[Double] = Some(1.0)) = {
     Action.async { implicit request2session =>
       trainData.cache()
-      val model = ALS.trainImplicit(trainData, 10, 5, 0.01, 1.0)
+      val model = ALS.trainImplicit(trainData, rank.get, iterations.get, lambda.get, alpha.get)
       Future.successful(Ok("Model trained"))
     }
   }

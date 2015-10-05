@@ -26,4 +26,4 @@ GET         /dc/data/full-stats             controllers.DataMungingController.fu
 # Ch3 - Recommender Systems
 GET         /mr/data/artist/:id             controllers.MusicRecommenderController.lookupArtistById(id:Int)
 GET         /mr/data/sample                 controllers.MusicRecommenderController.sample(withReplacement:Option[Boolean], count: Option[Int])
-GET         /mr/train                       controllers.MusicRecommenderController.train()
+GET         /mr/train                       controllers.MusicRecommenderController.train(rank: Option[Int], iterations: Option[Int], lambda: Option[Double], alpha: Option[Double])
