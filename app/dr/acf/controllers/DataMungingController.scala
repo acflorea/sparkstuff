@@ -1,7 +1,7 @@
-package controllers
+package dr.acf.controllers
 
+import dr.acf.model.datamunging.{MatchData, NAStatCounter}
 import dr.acf.services.spark.SparkService._
-import model.datamunging.{MatchData, NAStatCounter}
 import play.api.libs.json._
 import play.api.mvc.{Action, Controller}
 

@@ -1,4 +1,4 @@
-package controllers
+package dr.acf.controllers
 
 import dr.acf.services.spark.SparkService._
 import org.apache.spark.mllib.recommendation.{ALS, Rating}

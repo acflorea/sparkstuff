@@ -3,27 +3,27 @@
 # ~~~~
 
 # Home page
-GET         /                               controllers.Application.index
+GET         /                               dr.acf.controllers.Application.index
 
 # Map static resources from the /public folder to the /assets URL path
 GET         /assets/*file                   controllers.Assets.at(path="/public", file)
 
 # Admin
-POST        /admin/cancel-all-jobs          controllers.SparkAdminController.cancelAllJobs()
+POST        /admin/cancel-all-jobs          dr.acf.controllers.SparkAdminController.cancelAllJobs()
 
 # Ch2 - Data Analysis
-GET         /dc/raw/first                   controllers.DataMungingController.first(raw:Boolean = true)
-GET         /dc/data/first                  controllers.DataMungingController.first(raw:Boolean = false)
-GET         /dc/raw/count                   controllers.DataMungingController.count(raw:Boolean = true)
-GET         /dc/data/count                  controllers.DataMungingController.count(raw:Boolean = false)
-GET         /dc/raw/sample                  controllers.DataMungingController.sample(raw:Boolean = true, withReplacement:Option[Boolean], fraction: Option[Double])
-GET         /dc/data/sample                 controllers.DataMungingController.sample(raw:Boolean = false, withReplacement:Option[Boolean], fraction: Option[Double])
-GET         /dc/raw/take/:howMany           controllers.DataMungingController.take(raw:Boolean = true, howMany:Int)
-GET         /dc/data/take/:howMany          controllers.DataMungingController.take(raw:Boolean = false, howMany:Int)
-GET         /dc/data/stats/:position        controllers.DataMungingController.stats(position:Int)
-GET         /dc/data/full-stats             controllers.DataMungingController.fullStats()
+GET         /dc/raw/first                   dr.acf.controllers.DataMungingController.first(raw:Boolean = true)
+GET         /dc/data/first                  dr.acf.controllers.DataMungingController.first(raw:Boolean = false)
+GET         /dc/raw/count                   dr.acf.controllers.DataMungingController.count(raw:Boolean = true)
+GET         /dc/data/count                  dr.acf.controllers.DataMungingController.count(raw:Boolean = false)
+GET         /dc/raw/sample                  dr.acf.controllers.DataMungingController.sample(raw:Boolean = true, withReplacement:Option[Boolean], fraction: Option[Double])
+GET         /dc/data/sample                 dr.acf.controllers.DataMungingController.sample(raw:Boolean = false, withReplacement:Option[Boolean], fraction: Option[Double])
+GET         /dc/raw/take/:howMany           dr.acf.controllers.DataMungingController.take(raw:Boolean = true, howMany:Int)
+GET         /dc/data/take/:howMany          dr.acf.controllers.DataMungingController.take(raw:Boolean = false, howMany:Int)
+GET         /dc/data/stats/:position        dr.acf.controllers.DataMungingController.stats(position:Int)
+GET         /dc/data/full-stats             dr.acf.controllers.DataMungingController.fullStats()
 
 # Ch3 - Recommender Systems
-GET         /mr/data/artist/:id             controllers.MusicRecommenderController.lookupArtistById(id:Int)
-GET         /mr/data/sample                 controllers.MusicRecommenderController.sample(withReplacement:Option[Boolean], count: Option[Int])
-GET         /mr/train                       controllers.MusicRecommenderController.train(rank: Option[Int] = Some(10),iterations: Option[Int] = Some(5),lambda: Option[Double] = Some(0.01),alpha: Option[Double] = Some(1.0))
+GET         /mr/data/artist/:id             dr.acf.controllers.MusicRecommenderController.lookupArtistById(id:Int)
+GET         /mr/data/sample                 dr.acf.controllers.MusicRecommenderController.sample(withReplacement:Option[Boolean], count: Option[Int])
+GET         /mr/train                       dr.acf.controllers.MusicRecommenderController.train(rank: Option[Int] = Some(10),iterations: Option[Int] = Some(5),lambda: Option[Double] = Some(0.01),alpha: Option[Double] = Some(1.0))
