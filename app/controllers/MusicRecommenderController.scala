@@ -121,13 +121,14 @@ object MusicRecommenderController extends Controller {
    * @param alpha      confidence parameter
    */
   def train(
-             rank: Option[Int] = Some(10),
-             iterations: Option[Int] = Some(5),
-             lambda: Option[Double] = Some(0.01),
-             alpha: Option[Double] = Some(1.0)) = {
+             rank: Option[Int],
+             iterations: Option[Int],
+             lambda: Option[Double],
+             alpha: Option[Double]) = {
     Action.async { implicit request2session =>
       trainData.cache()
       val model = ALS.trainImplicit(trainData, rank.get, iterations.get, lambda.get, alpha.get)
+
       Future.successful(Ok("Model trained"))
     }
   }
