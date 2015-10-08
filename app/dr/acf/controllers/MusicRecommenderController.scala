@@ -1,7 +1,7 @@
 package dr.acf.controllers
 
 import dr.acf.services.spark.SparkService._
-import org.apache.spark.mllib.recommendation.{ALS, Rating}
+import org.apache.spark.mllib.recommendation.{MatrixFactorizationModel, ALS, Rating}
 import org.apache.spark.rdd.RDD
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
@@ -100,9 +100,8 @@ object MusicRecommenderController extends Controller {
    * Obtain a data sample
    * @return a fraction of data
    */
-  def sample(
-              withReplacement: Option[Boolean],
-              count: Option[Int]) = Action.async { implicit request =>
+  def sample(withReplacement: Option[Boolean],
+             count: Option[Int]) = Action.async { implicit request =>
 
     implicit val ratingFormat = Json.format[Rating]
     val samples = trainData.
@@ -113,23 +112,44 @@ object MusicRecommenderController extends Controller {
 
 
   /**
-   * Build the model
+   * Build the model and stores it for later use
    * ALS => MatrixFactorizationModel
+   * @param modelName the name to use to store the model
    * @param rank       number of features to use
    * @param iterations number of iterations of ALS (recommended: 10-20)
    * @param lambda     regularization factor (recommended: 0.01)
    * @param alpha      confidence parameter
    */
-  def train(
-             rank: Option[Int],
-             iterations: Option[Int],
-             lambda: Option[Double],
-             alpha: Option[Double]) = {
-    Action.async { implicit request2session =>
+  def trainAndSave(modelName: String,
+                   rank: Option[Int],
+                   iterations: Option[Int],
+                   lambda: Option[Double],
+                   alpha: Option[Double]) = {
+    Action.async { implicit request =>
+      val clock = System.currentTimeMillis()
       trainData.cache()
       val model = ALS.trainImplicit(trainData, rank.get, iterations.get, lambda.get, alpha.get)
+      model.save(sc, fs.resolvePath(rootFolder).concat(s"/models/$modelName"))
+      val duration = (System.currentTimeMillis() - clock) / 1000
+      Future.successful(Ok(s"Model trained and saved in $duration seconds."))
+    }
+  }
 
-      Future.successful(Ok("Model trained"))
+  /**
+   * Charges a previously saved model
+   * @param modelName name of the saved model
+   */
+  def loadModel(modelName: String) = {
+    Action.async { implicit request =>
+      val clock = System.currentTimeMillis()
+      val path = fs.resolvePath(rootFolder).concat(s"/models/$modelName")
+      if (fs.exists(path)) {
+        val model = MatrixFactorizationModel.load(sc, path)
+        val duration = (System.currentTimeMillis() - clock) / 1000
+        Future.successful(Ok(s"Model loaded in $duration seconds."))
+      } else {
+        Future.successful(NotFound)
+      }
     }
   }
 

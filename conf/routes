@@ -26,4 +26,6 @@ GET         /dc/data/full-stats             dr.acf.controllers.DataMungingContro
 # Ch3 - Recommender Systems
 GET         /mr/data/artist/:id             dr.acf.controllers.MusicRecommenderController.lookupArtistById(id:Int)
 GET         /mr/data/sample                 dr.acf.controllers.MusicRecommenderController.sample(withReplacement:Option[Boolean], count: Option[Int])
-GET         /mr/train                       dr.acf.controllers.MusicRecommenderController.train(rank: Option[Int] = Some(10),iterations: Option[Int] = Some(5),lambda: Option[Double] = Some(0.01),alpha: Option[Double] = Some(1.0))
+
+POST        /mr/train                       dr.acf.controllers.MusicRecommenderController.trainAndSave(modelName: String, rank: Option[Int] = Some(10),iterations: Option[Int] = Some(5),lambda: Option[Double] = Some(0.01),alpha: Option[Double] = Some(1.0))
+GET         /mr/load                        dr.acf.controllers.MusicRecommenderController.loadModel(modelName: String)

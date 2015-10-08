@@ -83,10 +83,9 @@ object DataMungingController extends Controller {
    * Obtain a data sample
    * @return a fraction of data
    */
-  def sample(
-              raw: Boolean,
-              withReplacement: Option[Boolean],
-              fraction: Option[Double]) = Action.async { implicit request =>
+  def sample(raw: Boolean,
+             withReplacement: Option[Boolean],
+             fraction: Option[Double]) = Action.async { implicit request =>
     if (raw) {
       // ***
       val samples = rawBlocks.
