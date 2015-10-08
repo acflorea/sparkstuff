@@ -29,3 +29,4 @@ GET         /mr/data/sample                 dr.acf.controllers.MusicRecommenderC
 
 POST        /mr/train                       dr.acf.controllers.MusicRecommenderController.trainAndSave(modelName: String, rank: Option[Int] = Some(10),iterations: Option[Int] = Some(5),lambda: Option[Double] = Some(0.01),alpha: Option[Double] = Some(1.0))
 GET         /mr/load                        dr.acf.controllers.MusicRecommenderController.loadModel(modelName: String)
+GET         /mr/random-check                 dr.acf.controllers.MusicRecommenderController.randomCheck(modelName: String)

@@ -1,5 +1,6 @@
 package dr.acf.controllers
 
+import dr.acf.model.musicrecommender.Artist
 import dr.acf.services.spark.SparkService._
 import org.apache.spark.mllib.recommendation.{MatrixFactorizationModel, ALS, Rating}
 import org.apache.spark.rdd.RDD
@@ -147,6 +148,42 @@ object MusicRecommenderController extends Controller {
         val model = MatrixFactorizationModel.load(sc, path)
         val duration = (System.currentTimeMillis() - clock) / 1000
         Future.successful(Ok(s"Model loaded in $duration seconds."))
+      } else {
+        Future.successful(NotFound)
+      }
+    }
+  }
+
+  /**
+   * Model quality check with a human touch
+   * @param modelName - name of the model to use
+   * @return - most listen to 5 artists plus 5 recommended artists
+   */
+  def randomCheck(modelName: String) = {
+    Action.async { implicit request =>
+      import dr.acf.model.musicrecommender.Artist._
+      val artist = (r: Rating) => Artist(r.product, artistByID.lookup(r.product).head)
+
+      val path = fs.resolvePath(rootFolder).concat(s"/models/$modelName")
+      if (fs.exists(path)) {
+        // load model
+        val model = MatrixFactorizationModel.load(sc, path)
+        // take on rating randomly
+        val sampleRating = trainData.takeSample(withReplacement = false, 1).head
+        // retrieve the user
+        val userID = sampleRating.user
+        // get this user top 5 ratings
+        val ratings = trainData.filter(_.user == userID).takeOrdered(5)(Ordering.by(r => -r.rating))
+        val ratedProducts = ratings map (_.product)
+        // make recommendation
+        val predictions =
+          model.recommendProducts(userID, 10) filter (r => !ratedProducts.contains(r.product))
+
+        val preferredArtists = ratings map artist
+        val predictedArtists = predictions take 5 map artist
+
+        val output = Map("preferred" -> preferredArtists, "predicted" -> predictedArtists)
+        Future.successful(Ok(Json.toJson(output)))
       } else {
         Future.successful(NotFound)
       }
