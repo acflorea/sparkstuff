@@ -161,6 +161,8 @@ object MusicRecommenderController extends Controller {
    */
   def randomCheck(modelName: String) = {
     Action.async { implicit request =>
+
+      artistByID.cache()
       import dr.acf.model.musicrecommender.Artist._
       val artist = (r: Rating) => Artist(r.product, artistByID.lookup(r.product).head)
 
